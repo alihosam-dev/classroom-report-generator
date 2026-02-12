@@ -92,3 +92,6 @@ dmypy.json
 # Student data (privacy protection)
 student_data/
 *_student_*.json
+
+# Personal documentation
+SETUP.md
