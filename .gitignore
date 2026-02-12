@@ -1,0 +1,94 @@
+# Google OAuth Credentials - NEVER COMMIT THESE
+credentials.json
+token.json
+token.pickle
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Generated reports and outputs
+output/
+generated_reports/
+reports/
+*.xlsx
+*.xls
+*.png
+*.jpg
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
+frontend/.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+frontend/coverage/
+
+# Logs
+*.log
+logs/
+backend/logs/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Student data (privacy protection)
+student_data/
+*_student_*.json
