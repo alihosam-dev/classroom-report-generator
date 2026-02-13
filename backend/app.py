@@ -16,6 +16,11 @@ else:
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['OUTPUT_DIR'] = os.getenv('OUTPUT_DIR', '../output/reports')
+# Session cookies must be cross-site when frontend + backend use different domains
+if os.getenv('FLASK_ENV') == 'production':
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_NAME'] = os.getenv('SESSION_COOKIE_NAME', 'crg_session')
 
 # Import routes
 from routes import auth, courses, reports
