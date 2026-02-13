@@ -23,9 +23,15 @@ class ReportCardGenerator:
 
     def _load_font(self, filename, size):
         font_path = Path(self.font_dir) / filename
-        if font_path.exists():
+        if not font_path.exists():
+            return None
+
+        try:
             return ImageFont.truetype(str(font_path), size)
-        return None
+        except OSError:
+            # Pillow raises an OSError with "unknown file format" when the file
+            # exists but cannot be parsed as a font (e.g., missing Git LFS pull).
+            return None
     
     def _get_letter_grade(self, percentage):
         """Convert percentage to letter grade"""
