@@ -15,7 +15,8 @@ else:
     CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-app.config['OUTPUT_DIR'] = os.getenv('OUTPUT_DIR', '../output/reports')
+default_output_dir = '/tmp/reports' if os.getenv('VERCEL') else '../output/reports'
+app.config['OUTPUT_DIR'] = os.getenv('OUTPUT_DIR', default_output_dir)
 # Session cookies must be cross-site when frontend + backend use different domains
 if os.getenv('FLASK_ENV') == 'production':
     app.config['SESSION_COOKIE_SAMESITE'] = 'None'

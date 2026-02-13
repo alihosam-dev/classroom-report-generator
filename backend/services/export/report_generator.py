@@ -12,7 +12,8 @@ class ReportGenerator:
         self.classroom_client = ClassroomClient()
         self.excel_generator = ExcelGenerator()
         self.report_card_generator = ReportCardGenerator()
-        self.output_dir = os.getenv('OUTPUT_DIR', '../output/reports')
+        default_output = '/tmp/reports' if os.getenv('VERCEL') else '../output/reports'
+        self.output_dir = os.getenv('OUTPUT_DIR', default_output)
     
     def _prepare_report_data(self, students, coursework, submissions):
         """Prepare report data for frontend display"""
