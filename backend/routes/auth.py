@@ -27,14 +27,23 @@ def callback():
         
         return jsonify({'message': 'Authentication successful'})
     except Exception as e:
+        print(f"ERROR in callback: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/status', methods=['GET'])
 def status():
-    """Check authentication status"""
+    """Check authentication status and get user info"""
     try:
         is_authenticated = auth_service.is_authenticated()
-        return jsonify({'authenticated': is_authenticated})
+        user_info = None
+        if is_authenticated:
+            user_info = auth_service.get_user_info()
+        return jsonify({
+            'authenticated': is_authenticated,
+            'user': user_info
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

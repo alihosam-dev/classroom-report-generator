@@ -4,16 +4,22 @@ Google OAuth2 authentication handler
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 import os
 import json
+
+# Disable HTTPS requirement for local development
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 class GoogleAuth:
     SCOPES = [
         'https://www.googleapis.com/auth/classroom.courses.readonly',
-        'https://www.googleapis.com/auth/classroom.coursework.students.readonly',
+        'https://www.googleapis.com/auth/classroom.coursework.students',
         'https://www.googleapis.com/auth/classroom.rosters.readonly',
         'https://www.googleapis.com/auth/classroom.profile.emails',
-        'https://www.googleapis.com/auth/classroom.student-submissions.students.readonly'
+        'https://www.googleapis.com/auth/classroom.student-submissions.students.readonly',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email'
     ]
     
     def __init__(self):
@@ -45,6 +51,8 @@ class GoogleAuth:
             redirect_uri=self.redirect_uri
         )
         
+        # Allow scope changes - Google may not return all requested scopes
+        flow.oauth2session.scope = None
         flow.fetch_token(code=code)
         credentials = flow.credentials
         
@@ -79,6 +87,24 @@ class GoogleAuth:
         """Clear stored credentials"""
         if os.path.exists(self.token_file):
             os.remove(self.token_file)
+    
+    def get_user_info(self):
+        """Get user profile information"""
+        credentials = self.get_credentials()
+        if not credentials:
+            return None
+        
+        try:
+            service = build('oauth2', 'v2', credentials=credentials)
+            user_info = service.userinfo().get().execute()
+            return {
+                'email': user_info.get('email'),
+                'name': user_info.get('name'),
+                'picture': user_info.get('picture')
+            }
+        except Exception as e:
+            print(f"Error fetching user info: {e}")
+            return None
     
     def _save_credentials(self, credentials):
         """Save credentials to file"""

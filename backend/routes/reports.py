@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, send_file
 from services.export.report_generator import ReportGenerator
 import os
+import zipfile
+from io import BytesIO
 
 bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
@@ -56,5 +58,33 @@ def list_reports():
                 if os.path.isfile(os.path.join(output_dir, f))]
         
         return jsonify({'files': files})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@bp.route('/download-cards/<report_id>', methods=['GET'])
+def download_report_cards(report_id):
+    """Download all report card images as a zip file"""
+    try:
+        output_dir = os.getenv('OUTPUT_DIR', '../output/reports')
+        cards_dir = os.path.join(output_dir, f'report_cards_{report_id}')
+        
+        if not os.path.exists(cards_dir):
+            return jsonify({'error': 'Report cards not found'}), 404
+        
+        # Create zip file in memory
+        memory_file = BytesIO()
+        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for filename in os.listdir(cards_dir):
+                if filename.endswith('.png'):
+                    file_path = os.path.join(cards_dir, filename)
+                    zf.write(file_path, filename)
+        
+        memory_file.seek(0)
+        return send_file(
+            memory_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=f'report_cards_{report_id}.zip'
+        )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
