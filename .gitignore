@@ -62,6 +62,7 @@ frontend/dist/
 frontend/.env.local
 frontend/.env.production
 frontend/.DS_Store
+backend/assets/fonts/
 
 # IDE
 .vscode/

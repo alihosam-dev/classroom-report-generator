@@ -3,6 +3,7 @@ Report card image generator with modern, professional design
 """
 from PIL import Image, ImageDraw, ImageFont
 import os
+from pathlib import Path
 
 class ReportCardGenerator:
     def __init__(self):
@@ -15,6 +16,16 @@ class ReportCardGenerator:
         self.text_dark = (31, 41, 55)  # Dark gray
         self.text_light = (107, 114, 128)  # Medium gray
         self.bg_light = (249, 250, 251)  # Light background
+        self.font_dir = os.getenv(
+            'REPORT_CARD_FONT_DIR',
+            str(Path(__file__).resolve().parent.parent.parent / 'assets' / 'fonts')
+        )
+
+    def _load_font(self, filename, size):
+        font_path = Path(self.font_dir) / filename
+        if font_path.exists():
+            return ImageFont.truetype(str(font_path), size)
+        return None
     
     def _get_letter_grade(self, percentage):
         """Convert percentage to letter grade"""
@@ -61,27 +72,21 @@ class ReportCardGenerator:
         student_id = student.get('userId')
         course_name = course.get('name', 'Course')
         
-        # Load fonts - Try SF Pro (macOS system font), then fallback to others
-        try:
-            # Try SF Pro Display (modern macOS font)
-            title_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Display-Bold.otf', 56)
-            subtitle_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Display-Medium.otf', 36)
-            heading_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Display-Semibold.otf', 32)
-            text_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Text-Regular.otf', 28)
-            small_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Text-Regular.otf', 24)
-            grade_font = ImageFont.truetype('/System/Library/Fonts/SF-Pro-Display-Bold.otf', 36)
-        except:
-            try:
-                # Fallback to Avenir (also on macOS)
-                title_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 56)
-                subtitle_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 36)
-                heading_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 32)
-                text_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 28)
-                small_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 24)
-                grade_font = ImageFont.truetype('/System/Library/Fonts/Avenir Next.ttc', 36)
-            except:
-                # Final fallback
-                title_font = subtitle_font = heading_font = text_font = small_font = grade_font = ImageFont.load_default()
+        # Load fonts from bundled assets, fallback to default if missing
+        title_font = self._load_font('SFPRODISPLAYBOLD.OTF', 56)
+        subtitle_font = self._load_font('SFPRODISPLAYMEDIUM.OTF', 36)
+        heading_font = self._load_font('SFPRODISPLAYSEMIBOLDITALIC.OTF', 32)
+        text_font = self._load_font('sf-pro-text-regular.otf', 28)
+        small_font = self._load_font('sf-pro-text-regular.otf', 24)
+        grade_font = self._load_font('SFPRODISPLAYBOLD.OTF', 36)
+
+        if not all([title_font, subtitle_font, heading_font, text_font, small_font, grade_font]):
+            title_font = title_font or ImageFont.load_default()
+            subtitle_font = subtitle_font or title_font
+            heading_font = heading_font or title_font
+            text_font = text_font or ImageFont.load_default()
+            small_font = small_font or text_font
+            grade_font = grade_font or title_font
         
         # Header with gradient effect (simulated with rectangles)
         header_height = 280
