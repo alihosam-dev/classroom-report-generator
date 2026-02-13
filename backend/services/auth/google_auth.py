@@ -1,6 +1,7 @@
 """
 Google OAuth2 authentication handler
 """
+from flask import session
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -24,7 +25,8 @@ class GoogleAuth:
     
     def __init__(self):
         self.credentials_file = os.getenv('CREDENTIALS_FILE', 'credentials.json')
-        self.token_file = os.getenv('TOKEN_FILE', 'token.json')
+        default_token_file = '/tmp/token.json' if os.getenv('VERCEL') else 'token.json'
+        self.token_file = os.getenv('TOKEN_FILE', default_token_file)
         self.redirect_uri = os.getenv('REDIRECT_URI', 'http://localhost:3000/auth/callback')
     
     def get_authorization_url(self):
@@ -105,16 +107,32 @@ class GoogleAuth:
     
     def get_credentials(self):
         """Get stored credentials or None"""
-        if not os.path.exists(self.token_file):
+        credentials = None
+
+        try:
+            session_data = session.get('credentials')
+        except RuntimeError:
+            session_data = None
+        if session_data:
+            credentials = Credentials(
+                token=session_data.get('token'),
+                refresh_token=session_data.get('refresh_token'),
+                token_uri=session_data.get('token_uri'),
+                client_id=session_data.get('client_id'),
+                client_secret=session_data.get('client_secret'),
+                scopes=session_data.get('scopes', self.SCOPES)
+            )
+        elif os.path.exists(self.token_file):
+            credentials = Credentials.from_authorized_user_file(
+                self.token_file,
+                self.SCOPES
+            )
+
+        if not credentials:
             return None
-        
-        credentials = Credentials.from_authorized_user_file(
-            self.token_file, 
-            self.SCOPES
-        )
-        
+
         # Refresh if expired
-        if credentials and credentials.expired and credentials.refresh_token:
+        if credentials.expired and credentials.refresh_token:
             credentials.refresh(Request())
             self._save_credentials(credentials)
         
@@ -129,6 +147,10 @@ class GoogleAuth:
         """Clear stored credentials"""
         if os.path.exists(self.token_file):
             os.remove(self.token_file)
+        try:
+            session.pop('credentials', None)
+        except RuntimeError:
+            pass
     
     def get_user_info(self):
         """Get user profile information"""
@@ -149,8 +171,20 @@ class GoogleAuth:
     
     def _save_credentials(self, credentials):
         """Save credentials to file"""
-        with open(self.token_file, 'w') as token:
-            token.write(credentials.to_json())
+        try:
+            with open(self.token_file, 'w') as token:
+                token.write(credentials.to_json())
+        except OSError:
+            fallback_path = '/tmp/token.json'
+            with open(fallback_path, 'w') as token:
+                token.write(credentials.to_json())
+            self.token_file = fallback_path
+
+        try:
+            session['credentials'] = self._credentials_to_dict(credentials)
+        except RuntimeError:
+            # No active request context available
+            pass
     
     def _credentials_to_dict(self, credentials):
         """Convert credentials to dictionary"""
