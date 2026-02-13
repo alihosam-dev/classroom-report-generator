@@ -1,0 +1,80 @@
+{
+  "app": {
+    "title": "Classroom Report Generator",
+    "tagline": "Generate comprehensive grade reports",
+    "subtitle": "Transform your Google Classroom data into comprehensive, professional reports"
+  },
+  "splash": {
+    "whatItDoes": "What This App Does",
+    "features": {
+      "connect": "Connect to your Google Classroom account securely",
+      "select": "Select courses and assignments to analyze",
+      "excel": "Generate detailed Excel spreadsheets with grades and statistics",
+      "reportCards": "Create individual report cards for each student",
+      "view": "View comprehensive grade reports directly in your browser"
+    },
+    "signIn": "Sign in with Google",
+    "privacyNote": "Your data is never stored. All processing happens securely with Google's APIs."
+  },
+  "header": {
+    "signOut": "Sign Out"
+  },
+  "courses": {
+    "title": "Select Course",
+    "step": "1."
+  },
+  "assignments": {
+    "title": "Select Assignments",
+    "step": "2.",
+    "selected": "of {total} selected",
+    "showAll": "Show All ({count} more)",
+    "showLess": "Show Less",
+    "points": "pts"
+  },
+  "generate": {
+    "title": "Generate Report",
+    "step": "3.",
+    "includeGrades": "Include grades in report",
+    "button": "Generate Reports",
+    "generating": "Generating..."
+  },
+  "results": {
+    "title": "Student Grades",
+    "success": "Reports Generated Successfully!",
+    "excelLabel": "Excel Spreadsheet",
+    "reportCardsLabel": "Report Cards",
+    "students": "students",
+    "downloadExcel": "Download Excel",
+    "downloadCards": "Download All Cards (ZIP)",
+    "tableHeaders": {
+      "student": "Student",
+      "average": "Average"
+    },
+    "analysis": {
+      "title": "Grade Analysis & Insights",
+      "classStats": "Class Statistics",
+      "assignments": "Assignment Performance",
+      "insights": "Key Insights",
+      "average": "Class Average",
+      "highest": "Highest",
+      "lowest": "Lowest",
+      "totalStudents": "Total Students",
+      "gradedStudents": "Graded Students",
+      "submissions": "Submissions",
+      "graded": "Graded",
+      "insightMessages": {
+        "excellentPerformance": "Excellent class performance! The class average is 90% or above.",
+        "strongPerformance": "Strong class performance with an average above 80%.",
+        "belowAverage": "Class average is below 70%. Consider reviewing difficult topics.",
+        "strugglingStudents": "{count} student(s) scoring below 60% may need additional support.",
+        "highPerformers": "{count} student(s) achieving 95% or higher - excellent work!",
+        "wideDistribution": "Wide grade distribution ({spread}% spread) indicates varied understanding levels."
+      }
+    }
+  },
+  "status": {
+    "loading": "Loading...",
+    "notGraded": "Not Graded Yet",
+    "notSubmitted": "Not Submitted"
+  }
+}
