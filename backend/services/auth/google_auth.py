@@ -29,11 +29,32 @@ class GoogleAuth:
     
     def get_authorization_url(self):
         """Generate OAuth authorization URL"""
-        flow = Flow.from_client_secrets_file(
-            self.credentials_file,
-            scopes=self.SCOPES,
-            redirect_uri=self.redirect_uri
-        )
+        # Try to create flow from file first, then from environment variables
+        try:
+            if os.path.exists(self.credentials_file):
+                flow = Flow.from_client_secrets_file(
+                    self.credentials_file,
+                    scopes=self.SCOPES,
+                    redirect_uri=self.redirect_uri
+                )
+            else:
+                # Fallback to environment variables for production
+                client_config = {
+                    "web": {
+                        "client_id": os.getenv('GOOGLE_CLIENT_ID'),
+                        "client_secret": os.getenv('GOOGLE_CLIENT_SECRET'),
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "redirect_uris": [self.redirect_uri]
+                    }
+                }
+                flow = Flow.from_client_config(
+                    client_config,
+                    scopes=self.SCOPES,
+                    redirect_uri=self.redirect_uri
+                )
+        except Exception as e:
+            raise Exception(f"Failed to create OAuth flow: {str(e)}")
         
         auth_url, _ = flow.authorization_url(
             access_type='offline',
@@ -45,11 +66,32 @@ class GoogleAuth:
     
     def exchange_code(self, code):
         """Exchange authorization code for credentials"""
-        flow = Flow.from_client_secrets_file(
-            self.credentials_file,
-            scopes=self.SCOPES,
-            redirect_uri=self.redirect_uri
-        )
+        # Try to create flow from file first, then from environment variables
+        try:
+            if os.path.exists(self.credentials_file):
+                flow = Flow.from_client_secrets_file(
+                    self.credentials_file,
+                    scopes=self.SCOPES,
+                    redirect_uri=self.redirect_uri
+                )
+            else:
+                # Fallback to environment variables for production
+                client_config = {
+                    "web": {
+                        "client_id": os.getenv('GOOGLE_CLIENT_ID'),
+                        "client_secret": os.getenv('GOOGLE_CLIENT_SECRET'),
+                        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                        "token_uri": "https://oauth2.googleapis.com/token",
+                        "redirect_uris": [self.redirect_uri]
+                    }
+                }
+                flow = Flow.from_client_config(
+                    client_config,
+                    scopes=self.SCOPES,
+                    redirect_uri=self.redirect_uri
+                )
+        except Exception as e:
+            raise Exception(f"Failed to create OAuth flow: {str(e)}")
         
         # Allow scope changes - Google may not return all requested scopes
         flow.oauth2session.scope = None
