@@ -6,7 +6,13 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+
+# Configure CORS for production
+if os.getenv('FLASK_ENV') == 'production':
+    allowed_origins = os.getenv('ALLOWED_ORIGINS', '').split(',')
+    CORS(app, supports_credentials=True, origins=allowed_origins)
+else:
+    CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['OUTPUT_DIR'] = os.getenv('OUTPUT_DIR', '../output/reports')
@@ -33,5 +39,7 @@ def health():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    port = int(os.getenv('BACKEND_PORT', 5001))
-    app.run(debug=True, port=port, host='127.0.0.1')
+    port = int(os.getenv('PORT', os.getenv('BACKEND_PORT', 5001)))
+    debug = os.getenv('FLASK_ENV') != 'production'
+    host = '0.0.0.0' if os.getenv('FLASK_ENV') == 'production' else '127.0.0.1'
+    app.run(debug=debug, port=port, host=host)
