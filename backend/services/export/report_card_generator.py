@@ -2,6 +2,7 @@
 Report card image generator with modern, professional design
 """
 from PIL import Image, ImageDraw, ImageFont
+import logging
 import os
 from pathlib import Path
 
@@ -20,17 +21,30 @@ class ReportCardGenerator:
             'REPORT_CARD_FONT_DIR',
             str(Path(__file__).resolve().parent.parent.parent / 'assets' / 'fonts')
         )
+        self.force_bundled_fonts = os.getenv('REPORT_CARD_FORCE_BUNDLED_FONTS', 'false').lower() == 'true'
+        self._font_cache = {}
+        self.logger = logging.getLogger(__name__)
 
     def _load_font(self, filename, size):
         font_path = Path(self.font_dir) / filename
+        cache_key = (filename, size)
+
+        if cache_key in self._font_cache:
+            return self._font_cache[cache_key]
+
         if not font_path.exists():
+            self.logger.warning('Font %s not found at %s', filename, font_path)
             return None
 
         try:
-            return ImageFont.truetype(str(font_path), size)
-        except OSError:
+            font = ImageFont.truetype(str(font_path), size)
+            self._font_cache[cache_key] = font
+            self.logger.info('Loaded font %s from %s', filename, font_path)
+            return font
+        except OSError as exc:
             # Pillow raises an OSError with "unknown file format" when the file
             # exists but cannot be parsed as a font (e.g., missing Git LFS pull).
+            self.logger.error('Failed to load font %s from %s: %s', filename, font_path, exc)
             return None
     
     def _get_letter_grade(self, percentage):
@@ -78,21 +92,35 @@ class ReportCardGenerator:
         student_id = student.get('userId')
         course_name = course.get('name', 'Course')
         
-        # Load fonts from bundled assets, fallback to default if missing
-        title_font = self._load_font('SFPRODISPLAYBOLD.OTF', 56)
-        subtitle_font = self._load_font('SFPRODISPLAYMEDIUM.OTF', 36)
-        heading_font = self._load_font('SFPRODISPLAYSEMIBOLDITALIC.OTF', 32)
-        text_font = self._load_font('sf-pro-text-regular.otf', 28)
-        small_font = self._load_font('sf-pro-text-regular.otf', 24)
-        grade_font = self._load_font('SFPRODISPLAYBOLD.OTF', 36)
+        font_specs = {
+            'title_font': ('SFPRODISPLAYBOLD.OTF', 56),
+            'subtitle_font': ('SFPRODISPLAYMEDIUM.OTF', 36),
+            'heading_font': ('SFPRODISPLAYSEMIBOLDITALIC.OTF', 32),
+            'text_font': ('sf-pro-text-regular.otf', 28),
+            'small_font': ('sf-pro-text-regular.otf', 24),
+            'grade_font': ('SFPRODISPLAYBOLD.OTF', 36)
+        }
+        fonts = {key: self._load_font(*spec) for key, spec in font_specs.items()}
+        missing_fonts = [key for key, font in fonts.items() if font is None]
 
-        if not all([title_font, subtitle_font, heading_font, text_font, small_font, grade_font]):
-            title_font = title_font or ImageFont.load_default()
-            subtitle_font = subtitle_font or title_font
-            heading_font = heading_font or title_font
-            text_font = text_font or ImageFont.load_default()
-            small_font = small_font or text_font
-            grade_font = grade_font or title_font
+        if missing_fonts:
+            self.logger.warning('Bundled fonts missing or unreadable: %s', ', '.join(missing_fonts))
+            if self.force_bundled_fonts:
+                raise RuntimeError(
+                    'Bundled report card fonts are required but missing. '
+                    'Make sure git lfs assets are pulled on this environment.'
+                )
+            fallback_font = ImageFont.load_default()
+            for key in missing_fonts:
+                fonts[key] = fallback_font
+            self.logger.info('Falling back to Pillow default font for: %s', ', '.join(missing_fonts))
+
+        title_font = fonts['title_font']
+        subtitle_font = fonts['subtitle_font']
+        heading_font = fonts['heading_font']
+        text_font = fonts['text_font']
+        small_font = fonts['small_font']
+        grade_font = fonts['grade_font']
         
         # Header with gradient effect (simulated with rectangles)
         header_height = 280
