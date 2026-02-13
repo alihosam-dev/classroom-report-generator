@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, send_file
+from flask import Blueprint, jsonify, request, send_file, current_app
 from services.export.report_generator import ReportGenerator
 import os
 import zipfile
@@ -35,7 +35,7 @@ def generate_report():
 def download_file(filename):
     """Download generated report file"""
     try:
-        output_dir = os.getenv('OUTPUT_DIR', '../output/reports')
+        output_dir = current_app.config.get('OUTPUT_DIR', '../output/reports')
         file_path = os.path.join(output_dir, filename)
         
         if not os.path.exists(file_path):
@@ -49,7 +49,7 @@ def download_file(filename):
 def list_reports():
     """List all generated reports"""
     try:
-        output_dir = os.getenv('OUTPUT_DIR', '../output/reports')
+        output_dir = current_app.config.get('OUTPUT_DIR', '../output/reports')
         
         if not os.path.exists(output_dir):
             return jsonify({'files': []})
@@ -65,7 +65,7 @@ def list_reports():
 def download_report_cards(report_id):
     """Download all report card images as a zip file"""
     try:
-        output_dir = os.getenv('OUTPUT_DIR', '../output/reports')
+        output_dir = current_app.config.get('OUTPUT_DIR', '../output/reports')
         cards_dir = os.path.join(output_dir, f'report_cards_{report_id}')
         
         if not os.path.exists(cards_dir):
