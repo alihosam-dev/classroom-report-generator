@@ -204,6 +204,7 @@ class ReportGenerator:
         
         # Generate report cards
         report_cards = []
+        font_debug = {}
         if include_grades:
             cards_dir = os.path.join(self.output_dir, f'report_cards_{report_id}')
             os.makedirs(cards_dir, exist_ok=True)
@@ -214,6 +215,7 @@ class ReportGenerator:
                 submissions=submissions,
                 output_dir=cards_dir
             )
+            font_debug = self.report_card_generator.get_font_debug() or {}
         
         # Prepare report data for display
         report_data = self._prepare_report_data(students, selected_coursework, submissions)
@@ -226,5 +228,6 @@ class ReportGenerator:
             'report_id': report_id,
             'report_data': report_data,
             'analysis': analysis,
+            'font_debug': font_debug,
             'message': f'Generated reports for {len(students)} students'
         }

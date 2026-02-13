@@ -23,6 +23,8 @@ class ReportCardGenerator:
         )
         self.force_bundled_fonts = os.getenv('REPORT_CARD_FORCE_BUNDLED_FONTS', 'false').lower() == 'true'
         self._font_cache = {}
+        self._font_errors = {}
+        self._font_debug = {}
         self.logger = logging.getLogger(__name__)
 
     def _load_font(self, filename, size):
@@ -34,16 +36,19 @@ class ReportCardGenerator:
 
         if not font_path.exists():
             self.logger.warning('Font %s not found at %s', filename, font_path)
+            self._font_errors[cache_key] = 'missing'
             return None
 
         try:
             font = ImageFont.truetype(str(font_path), size)
             self._font_cache[cache_key] = font
+            self._font_errors[cache_key] = None
             self.logger.info('Loaded font %s from %s', filename, font_path)
             return font
         except OSError as exc:
             # Pillow raises an OSError with "unknown file format" when the file
             # exists but cannot be parsed as a font (e.g., missing Git LFS pull).
+            self._font_errors[cache_key] = f'parse_error: {exc}'
             self.logger.error('Failed to load font %s from %s: %s', filename, font_path, exc)
             return None
     
@@ -92,6 +97,7 @@ class ReportCardGenerator:
         student_id = student.get('userId')
         course_name = course.get('name', 'Course')
         
+        self._font_errors = {}
         font_specs = {
             'title_font': ('SFPRODISPLAYBOLD.OTF', 56),
             'subtitle_font': ('SFPRODISPLAYMEDIUM.OTF', 36),
@@ -114,6 +120,30 @@ class ReportCardGenerator:
             for key in missing_fonts:
                 fonts[key] = fallback_font
             self.logger.info('Falling back to Pillow default font for: %s', ', '.join(missing_fonts))
+
+        font_details = []
+        font_dir_path = Path(self.font_dir)
+        fallback_used = bool(missing_fonts and not self.force_bundled_fonts)
+        for alias, (filename, size) in font_specs.items():
+            font_path = font_dir_path / filename
+            font_details.append({
+                'alias': alias,
+                'filename': filename,
+                'size': size,
+                'path': str(font_path),
+                'exists': font_path.exists(),
+                'load_error': self._font_errors.get((filename, size)),
+                'using_fallback': alias in missing_fonts and not self.force_bundled_fonts
+            })
+
+        self._font_debug = {
+            'font_dir': str(font_dir_path),
+            'font_dir_exists': font_dir_path.exists(),
+            'force_bundled_fonts': self.force_bundled_fonts,
+            'missing_fonts': missing_fonts,
+            'fallback_used': fallback_used,
+            'fonts': font_details
+        }
 
         title_font = fonts['title_font']
         subtitle_font = fonts['subtitle_font']
@@ -244,4 +274,8 @@ class ReportCardGenerator:
         for char in invalid_chars:
             filename = filename.replace(char, '_')
         return filename
+
+    def get_font_debug(self):
+        """Expose last font loading status for API callers"""
+        return self._font_debug
 
