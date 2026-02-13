@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { authService, courseService, reportService } from '../lib/services.js';
-import { mockService } from '../services/mockService.js';
+import { authService, courseService, reportService } from '@/lib/services';
+import { mockService } from '@/services/mockService';
 import { useLocale } from './LocaleProvider';
 import LanguageSwitcher from './LanguageSwitcher';
 import Avatar from './Avatar';
