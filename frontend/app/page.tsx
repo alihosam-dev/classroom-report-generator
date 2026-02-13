@@ -589,7 +589,7 @@ export default function Home() {
                     <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{result.excel_file}</p>
                   </div>
                   <a
-                    href={`http://localhost:5001/api/reports/download/${encodeURIComponent(result.excel_file)}`}
+                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reports/download/${encodeURIComponent(result.excel_file)}`}
                     download
                     className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 transition shadow-md flex-shrink-0"
                   >
@@ -606,7 +606,7 @@ export default function Home() {
                       <p className="text-sm font-semibold text-gray-800">{result.report_cards.length} {t.results?.students}</p>
                     </div>
                     <a
-                      href={`http://localhost:5001/api/reports/download-cards/${result.report_id}`}
+                      href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reports/download-cards/${result.report_id}`}
                       download
                       className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-green-700 transition shadow-md"
                     >

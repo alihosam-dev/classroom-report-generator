@@ -103,7 +103,6 @@ class GoogleAuth:
                 'picture': user_info.get('picture')
             }
         except Exception as e:
-            print(f"Error fetching user info: {e}")
             return None
     
     def _save_credentials(self, credentials):

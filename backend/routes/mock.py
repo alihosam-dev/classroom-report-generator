@@ -85,5 +85,4 @@ def generate_mock_report():
         })
     
     except Exception as e:
-        print(f"Error generating mock report: {str(e)}")
         return jsonify({'error': str(e)}), 500

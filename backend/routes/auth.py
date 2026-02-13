@@ -27,9 +27,6 @@ def callback():
         
         return jsonify({'message': 'Authentication successful'})
     except Exception as e:
-        print(f"ERROR in callback: {str(e)}")
-        import traceback
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/status', methods=['GET'])

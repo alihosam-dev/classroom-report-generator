@@ -3,10 +3,13 @@ credentials.json
 token.json
 token.pickle
 
-# Environment variables
+# Environment variables  
 .env
-.env.local
 .env.production
+
+# Local environment files (but keep examples)
+.env.local
+!.env.local.example
 
 # Generated reports and outputs
 output/
@@ -80,6 +83,7 @@ frontend/coverage/
 *.log
 logs/
 backend/logs/
+backend_log.txt
 
 # Jupyter Notebooks
 .ipynb_checkpoints
