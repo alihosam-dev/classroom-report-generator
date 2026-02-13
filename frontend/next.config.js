@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
 
+const projectRoot = path.resolve(__dirname);
+
 const nextConfig = {
   output: 'standalone',
   env: {
@@ -8,11 +10,11 @@ const nextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      '@': './'
+      '@': projectRoot
     }
   },
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(__dirname);
+    config.resolve.alias['@'] = projectRoot;
     return config;
   }
 }
